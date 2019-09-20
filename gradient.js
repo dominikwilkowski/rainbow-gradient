@@ -54,13 +54,13 @@ function rgb2hsv({ r, g, b }) {
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
  * Assumes h, s, and v are contained in the set [0, 1] and
  * returns r, g, and b in the set [0, 255].
- * 
+ *
  * @author https://gist.github.com/mjackson/5311256
  *
  * @param   Number  h       The hue
  * @param   Number  s       The saturation
  * @param   Number  v       The value
- * 
+ *
  * @return  Array           The RGB representation
  */
 function hsv2rgb( h, s, v ) {
@@ -110,10 +110,29 @@ function hsv2rgb( h, s, v ) {
 	return [ r * 255, g * 255, b * 255 ];
 }
 
+/**
+ * Converts RGB to HEX
+ *
+ * @param  {integer} r - The Red value
+ * @param  {integer} g - The Green value
+ * @param  {integer} b - The Blue value
+ *
+ * @return {string}    - A HEX color
+ */
 function rgb2hex( r, g, b ) {
-	return "#" + ( ( 1 << 24 ) + ( r << 16 ) + ( g << 8 ) + b ).toString(16).slice(1);
+	return '#' +
+		( ( 1 << 24 ) + ( r << 16 ) + ( g << 8 ) + b )
+		.toString( 16 )
+		.slice( 1 );
 }
 
+/**
+ * Convert HEX to RGB
+ *
+ * @param  {string} hex - The HEX color
+ *
+ * @return {object}     - An object with RGB values
+ */
 function hex2rgb( hex ) {
 	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
 
@@ -124,19 +143,44 @@ function hex2rgb( hex ) {
 	} : null;
 }
 
+/**
+ * Convert HEX to HSV
+ *
+ * @param  {string} hex - A HEX color
+ *
+ * @return {array}      - An array of [ x, y, z ] coordinates
+ */
 function hex2HSV( hex ) {
 	const rgb = hex2rgb( hex );
 	const [ h, s, v ] = rgb2hsv( rgb );
 
-	return [ s, h, v ];
+	return [ s, h, v ]; // translated to x,y,z coordinates
 }
 
+/**
+ * Convert HSV to HEX
+ *
+ * @param  {integer} x - The x coordinates of the color space HSV
+ * @param  {integer} y - The y coordinates of the color space HSV
+ * @param  {integer} z - The z coordinates of the color space HSV
+ *
+ * @return {string}    - A HEX color
+ */
 function HSV2hex( x, y, z ) {
 	const [ r, g, b ] = hsv2rgb( y, x, z );
 
 	return rgb2hex( r, g, b );
 }
 
+/**
+ * Convert a point from a coordinate system to the cylindrical system
+ *
+ * @param  {integer} x - The x coordinates of the color space HSV
+ * @param  {integer} y - The y coordinates of the color space HSV
+ * @param  {integer} z - The z coordinates of the color space HSV
+ *
+ * @return {array}     - An array of a radius, theta and z
+ */
 function coord2cylindrical( x, y, z ) {
 	const TAU = 2 * Math.PI;
 	const radius = Math.sqrt( Math.pow( x, 2 ) + Math.pow( y, 2 ) );
@@ -164,6 +208,14 @@ function coord2cylindrical( x, y, z ) {
 	return [ radius, theta, z ];
 }
 
+/**
+ * Convert a point from a cylindrical system to the coordinate system
+ *
+ * @param  {float} radius - The radius of the point
+ * @param  {float} theta  - The radiant of the point (theta)
+ *
+ * @return {[type]}       - The x and y coordinates
+ */
 function cylindrical2coord( radius, theta ) {
 	const x = radius * Math.cos( theta );
 	const y = radius * Math.sin( theta );
@@ -171,10 +223,30 @@ function cylindrical2coord( radius, theta ) {
 	return [ x, y ];
 }
 
-function getLinear( fromRadius, toRadius, n, steps ) {
-	return fromRadius + n * ( ( toRadius - fromRadius ) / steps );
+/**
+ * Generate a linear path from a number to another number
+ *
+ * @param  {number}  pointA - The number from which to start
+ * @param  {number}  pointB - The number to go to
+ * @param  {integer} n      - The current step
+ * @param  {integer} steps  - The amount of steps
+ *
+ * @return {number}         - The number at step n
+ */
+function getLinear( pointA, pointB, n, steps ) {
+	return pointA + n * ( ( pointB - pointA ) / steps );
 }
 
+/**
+ * Generate a radial path from a number to another number
+ *
+ * @param  {number}  fromTheta - The radiant from which to start
+ * @param  {number}  toTheta   - The radiant to go to
+ * @param  {integer} n         - The current step
+ * @param  {integer} steps     - The amount of steps
+ *
+ * @return {number}            - The radiant at step n
+ */
 function getTheta( fromTheta, toTheta, n, steps ) {
 	const TAU = 2 * Math.PI;
 
@@ -196,6 +268,15 @@ function getTheta( fromTheta, toTheta, n, steps ) {
 	}
 }
 
+/**
+ * Generate a rainbow color gradient from one color to another color
+ *
+ * @param  {string}  fromColor - The color from which to start
+ * @param  {string}  toColor   - The color to go to
+ * @param  {integer} steps     - The amount of steps of the gradient
+ *
+ * @return {array}             - An array of colors
+ */
 function Gradient( fromColor, toColor, steps ) {
 	const [ fromCoordX, fromCoordY, fromCoordZ ] = hex2HSV( fromColor );
 	const [ toCoordX, toCoordY, toCoordZ ] = hex2HSV( toColor );
