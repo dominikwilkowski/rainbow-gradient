@@ -150,7 +150,7 @@ function hex2rgb( hex ) {
  *
  * @return {array}      - An array of [ x, y, z ] coordinates
  */
-function hex2HSV( hex ) {
+function hex2xyz( hex ) {
 	const rgb = hex2rgb( hex );
 	const [ h, s, v ] = rgb2hsv( rgb );
 
@@ -166,7 +166,7 @@ function hex2HSV( hex ) {
  *
  * @return {string}    - A HEX color
  */
-function HSV2hex( x, y, z ) {
+function xyz2hex( x, y, z ) {
 	const [ r, g, b ] = hsv2rgb( y, x, z );
 
 	return rgb2hex( r, g, b );
@@ -278,10 +278,10 @@ function getTheta( fromTheta, toTheta, n, steps ) {
  * @return {array}             - An array of colors
  */
 function Gradient( fromColor, toColor, steps ) {
-	const [ fromCoordX, fromCoordY, fromCoordZ ] = hex2HSV( fromColor );
-	const [ toCoordX, toCoordY, toCoordZ ] = hex2HSV( toColor );
+	const [ fromCoordX, fromCoordY, fromCoordZ ] = hex2xyz( fromColor );
+	const [ toCoordX, toCoordY, toCoordZ ] = hex2xyz( toColor );
 
-	// console.log(`${ fromColor } -> ${ HSV2hex( fromCoordX, fromCoordY, fromCoordZ ) }`);
+	// console.log(`${ fromColor } -> ${ xyz2hex( fromCoordX, fromCoordY, fromCoordZ ) }`);
 
 	// console.log(`fromX: ${ fromCoordX } fromY: ${ fromCoordY } fromZ: ${ fromCoordZ }`);
 	// console.log(`toX: ${ toCoordX } toY: ${ toCoordY } toZ: ${ toCoordZ }`);
@@ -302,7 +302,7 @@ function Gradient( fromColor, toColor, steps ) {
 
 		const [ x, y ] = cylindrical2coord( radius, theta );
 
-		console.log(`radius: ${ radius } theta: ${ theta } z: ${ z } hex: ${ HSV2hex( x, y, z ) }`);
+		console.log(`radius: ${ radius } theta: ${ theta } z: ${ z } hex: ${ xyz2hex( x, y, z ) }`);
 	}
 }
 
