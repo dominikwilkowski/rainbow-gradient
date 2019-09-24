@@ -152,9 +152,10 @@ function hex2rgb( hex ) {
  */
 function hex2xyz( hex ) {
 	const rgb = hex2rgb( hex );
-	const [ h, s, v ] = rgb2hsv( rgb );
+	const [ h, x, z ] = rgb2hsv( rgb );
+	const y = Math.PI * h;
 
-	return [ s, h, v ]; // translated to x,y,z coordinates
+	return [ x, y, z ];
 }
 
 /**
@@ -167,7 +168,8 @@ function hex2xyz( hex ) {
  * @return {string}    - A HEX color
  */
 function xyz2hex( x, y, z ) {
-	const [ r, g, b ] = hsv2rgb( y, x, z );
+	const degree = Math.round( Math.PI / y );
+	const [ r, g, b ] = hsv2rgb( degree, x, z );
 
 	return rgb2hex( r, g, b );
 }
@@ -249,23 +251,36 @@ function getLinear( pointA, pointB, n, steps ) {
  */
 function getTheta( fromTheta, toTheta, n, steps ) {
 	const TAU = 2 * Math.PI;
+	let longDistance;
 
 	if( fromTheta > toTheta ) {
-		if( fromTheta - toTheta < ( TAU / 2 ) ) {
-			return fromTheta + n * ( ( TAU - ( fromTheta - toTheta ) ) / steps );
+		if( fromTheta - toTheta < Math.PI ) {
+			longDistance = TAU - ( fromTheta - toTheta );
 		}
 		else {
-			return fromTheta + n * ( ( fromTheta - toTheta ) / steps );
+			longDistance = toTheta - fromTheta;
 		}
 	}
 	else {
-		if( toTheta - fromTheta < ( TAU / 2 ) ) {
-			return fromTheta + n * ( ( TAU - ( toTheta - fromTheta ) ) / steps );
+		if( toTheta - fromTheta < Math.PI ) {
+			longDistance = ( toTheta - fromTheta ) - TAU;
 		}
 		else {
-			return fromTheta + n * ( ( toTheta - fromTheta ) / steps );
+			longDistance = -1 * ( fromTheta - toTheta );
 		}
 	}
+
+	let result = fromTheta + ( n * ( longDistance / steps ) );
+
+	if( result < 0 ) {
+		result += TAU;
+	}
+
+	if( result > TAU ) {
+		result -= TAU;
+	}
+
+	return result;
 }
 
 /**
@@ -281,7 +296,7 @@ function Gradient( fromColor, toColor, steps ) {
 	const [ fromCoordX, fromCoordY, fromCoordZ ] = hex2xyz( fromColor );
 	const [ toCoordX, toCoordY, toCoordZ ] = hex2xyz( toColor );
 
-	// console.log(`${ fromColor } -> ${ xyz2hex( fromCoordX, fromCoordY, fromCoordZ ) }`);
+	console.log(`${ fromColor } -> ${ fromCoordX }, ${ fromCoordY }, ${ fromCoordZ } -> ${ xyz2hex( fromCoordX, fromCoordY, fromCoordZ ) }`);
 
 	// console.log(`fromX: ${ fromCoordX } fromY: ${ fromCoordY } fromZ: ${ fromCoordZ }`);
 	// console.log(`toX: ${ toCoordX } toY: ${ toCoordY } toZ: ${ toCoordZ }`);
@@ -296,9 +311,9 @@ function Gradient( fromColor, toColor, steps ) {
 	console.log();
 
 	for( n = 0; n < steps; n++ ) {
-		const radius = getLinear( fromRadius, toRadius, n, steps );
-		const theta = getTheta( fromTheta, toTheta, n, steps );
-		const z = getLinear( fromZ, toZ, n, steps );
+		const radius = getLinear( fromRadius, toRadius, n, ( steps - 1 ) );
+		const theta = getTheta( fromTheta, toTheta, n, ( steps - 1 ) );
+		const z = getLinear( fromZ, toZ, n, ( steps - 1 ) );
 
 		const [ x, y ] = cylindrical2coord( radius, theta );
 
