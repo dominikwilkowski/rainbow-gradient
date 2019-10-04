@@ -144,6 +144,42 @@ function hex2rgb( hex ) {
 }
 
 /**
+ * Convert HSV coordinate to xyz (Degree to Radiant)
+ *
+ * @param  {array}    -
+ * @param  {array}[0] - H
+ * @param  {array}[1] - S
+ * @param  {array}[2] - V
+ *
+ * @return {array}    - The xyz coordinates
+ */
+function hsv2xyz([ h, s, v ]) {
+	const x = s;
+	const y = ( h * 180 ) / Math.PI;
+	const z = v;
+
+	return [ x, y, z ];
+}
+
+/**
+ * Convert xyz coordinate to HSV (Radiant to Degree)
+ *
+ * @param  {array}    -
+ * @param  {array}[0] - X
+ * @param  {array}[1] - Y
+ * @param  {array}[2] - Z
+ *
+ * @return {array}    - The HSV coordinates
+ */
+function xyz2hsv([ x, y, z ]) {
+	const h = y * ( Math.PI / 180 );
+	const s = x;
+	const v = z;
+
+	return [ h, s, v ];
+}
+
+/**
  * Convert HEX to HSV
  *
  * @param  {string} hex - A HEX color
@@ -152,10 +188,10 @@ function hex2rgb( hex ) {
  */
 function hex2xyz( hex ) {
 	const rgb = hex2rgb( hex );
-	const [ h, x, z ] = rgb2hsv( rgb );
-	const y = h * 360 * ( Math.PI / 180 ); // convert to radiant
+	const hsv = rgb2hsv( rgb );
+	const xyz = hsv2xyz( hsv );
 
-	return [ x, y, z ];
+	return xyz;
 }
 
 /**
@@ -168,7 +204,7 @@ function hex2xyz( hex ) {
  * @return {string}    - A HEX color
  */
 function xyz2hex( x, y, z ) {
-	const h = y / (360 * ( Math.PI / 180 )); // convert to degree
+	const [ h, s, v ] = xyz2hsv([ x, y, z ]);
 	const [ r, g, b ] = hsv2rgb( h, x, z );
 
 	return rgb2hex( r, g, b );
@@ -302,26 +338,26 @@ function Gradient( fromColor, toColor, steps ) {
 	console.log(`fromX: ${ fromCoordX } fromY: ${ fromCoordY } fromZ: ${ fromCoordZ }`);
 	console.log(`toX: ${ toCoordX } toY: ${ toCoordY } toZ: ${ toCoordZ }`);
 
-	const [ fromRadius, fromTheta, fromZ ] = coord2cylindrical( fromCoordX, fromCoordY, fromCoordZ );
+	const [ fromX, fromTheta, fromZ ] = coord2cylindrical( fromCoordX, fromCoordY, fromCoordZ );
 	const [ toRadius, toTheta, toZ ] = coord2cylindrical( toCoordX, toCoordY, toCoordZ );
 
-	console.log(`fromRadius: ${ fromRadius } fromTheta: ${ fromTheta } fromZ: ${ fromZ }`);
+	console.log(`fromX: ${ fromX } fromTheta: ${ fromTheta } fromZ: ${ fromZ }`);
 	console.log(`toRadius: ${ toRadius } toTheta: ${ toTheta } toZ: ${ toZ }`);
 
 	// console.log(`(${ toCoordX },${ toCoordY }) -> (${ cylindrical2coord( toRadius, toTheta ) })`);
 	console.log();
 
 	for( n = 0; n < steps; n++ ) {
-		const radius = getLinear( fromRadius, toRadius, n, ( steps - 1 ) );
+		const x = getLinear( fromX, toRadius, n, ( steps - 1 ) );
 		const theta = getTheta( fromTheta, toTheta, n, ( steps - 1 ) );
 		const z = getLinear( fromZ, toZ, n, ( steps - 1 ) );
 
-		// const [ x, y ] = cylindrical2coord( radius, theta );
+		// const [ x, y ] = cylindrical2coord( x, theta );
 
-		// console.log(`radius: ${ radius } theta: ${ theta } z: ${ z } hex: ${ xyz2hex( radius, theta, z ) }`);
-		console.log(`<div style="background: ${ xyz2hex( radius, theta, z ) };width:5rem;height:5rem"></div>`);
+		console.log(`x: ${ x } theta: ${ theta } z: ${ z } hex: ${ xyz2hex( x, theta, z ) }`);
+		// console.log(`<div style="background: ${ xyz2hex( x, theta, z ) };width:5rem;height:5rem"></div>`);
 	}
 }
 
 
-const steps = Gradient( '#ff8800', '#8899dd', 5 );
+const steps = Gradient( '#ff8800', '#8899dd', 15 );
