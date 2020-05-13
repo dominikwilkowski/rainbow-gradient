@@ -3,13 +3,14 @@
  *
  * @author https://github.com/Gavin-YYC/colorconvert
  *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
+ * @param   {object} options   - Arguments
+ * @param   {number} options.r - The red color value
+ * @param   {number} options.g - The green color value
+ * @param   {number} options.b - The blue color value
  *
- * @return  Array           The HSV representation
+ * @return  {array}            - The HSV representation
  */
-function rgb2hsv({ r, g, b }) {
+function Rgb2hsv({ r, g, b }) {
 	r /= 255;
 	g /= 255;
 	b /= 255;
@@ -35,7 +36,7 @@ function rgb2hsv({ r, g, b }) {
 	else if( max === g ) {
 		h = 60 * ( ( b - r ) / diff ) + 120;
 	}
-	else if( max === b ) {
+	else { // if( max === b ) {
 		h = 60 * ( ( r - g ) / diff ) + 240;
 	};
 
@@ -47,79 +48,55 @@ function rgb2hsv({ r, g, b }) {
  *
  * @author https://github.com/Gavin-YYC/colorconvert
  *
- * @param   Number  h       The hue
- * @param   Number  s       The saturation
- * @param   Number  v       The value
+ * @param   {number}  h - The hue
+ * @param   {number}  s - The saturation
+ * @param   {number}  v - The value
  *
- * @return  Array           The RGB representation
+ * @typedef  {object} ReturnObject
+ *   @property {number}  r  - The red value
+ *   @property {number}  g  - The green value
+ *   @property {number}  b  - The blue value
+ *
+ * @return  {ReturnObject}  - The RGB representation
  */
-
-function hsv2rgb( h, s, v ) {
-	h /= 1;
+function Hsv2rgb( h, s, v ) {
+	h /= 60;
 	s /= 100;
 	v /= 100;
+	const hi = Math.floor( h ) % 6;
 
-	let r = 0;
-	let g = 0;
-	let b = 0;
+	const f = h - Math.floor( h );
+	const p = 255 * v * ( 1 - s );
+	const q = 255 * v * ( 1 - ( s * f ) );
+	const t = 255 * v * ( 1 - ( s * ( 1 - f ) ) );
+	v *= 255;
 
-	if( s === 0 ) {
-		r = g = b = v;
+	switch( hi ) {
+		case 0:
+			return { r: v, g: t, b: p };
+		case 1:
+			return { r: q, g: v, b: p };
+		case 2:
+			return { r: p, g: v, b: t };
+		case 3:
+			return { r: p, g: q, b: v };
+		case 4:
+			return { r: t, g: p, b: v };
+		case 5:
+			return { r: v, g: p, b: q };
 	}
-	else {
-		let _h = h / 60;
-		let i = Math.floor( _h );
-		let f = _h - i;
-		let p = v * ( 1 - s );
-		let q = v * ( 1 - f * s );
-		let t = v * ( 1 - ( 1 - f ) * s );
-		switch( i ) {
-			case 0:
-				r = v;
-				g = t;
-				b = p;
-				break;
-			case 1:
-				r = q;
-				g = v;
-				b = p;
-				break;
-			case 2:
-				r = p;
-				g = v;
-				b = t;
-				break;
-			case 3:
-				r = p;
-				g = q;
-				b = v;
-				break;
-			case 4:
-				r = t;
-				g = p;
-				b = v;
-				break;
-			case 5:
-				r = v;
-				g = p;
-				b = q;
-				break;
-		}
-	}
-
-	return [ Math.round( r * 255 ), Math.round( g * 255 ), Math.round( b * 255 ) ];
 }
 
 /**
  * Converts RGB to HEX
  *
- * @param  {integer} r - The Red value
- * @param  {integer} g - The Green value
- * @param  {integer} b - The Blue value
+ * @param  {number} r - The Red value
+ * @param  {number} g - The Green value
+ * @param  {number} b - The Blue value
  *
- * @return {string}    - A HEX color
+ * @return {string}   - A HEX color
  */
-function rgb2hex( r, g, b ) {
+function Rgb2hex( r, g, b ) {
 	const val = ( ( b | g << 8 | r << 16) | 1 << 24 ).toString( 16 ).slice( 1 );
 	return '#' + val.toLowerCase();
 }
@@ -129,12 +106,12 @@ function rgb2hex( r, g, b ) {
  *
  * @param  {string} hex - The HEX color
  *
- * @return {object}     - An object with RGB values
+ * @return {array}      - An object with RGB values
  */
-function hex2rgb( hex ) {
+function Hex2rgb( hex ) {
 	hex = hex.replace(/^#/, '');
 
-	if( hex.length === 8 ) {
+	if( hex.length > 6 ) {
 		hex = hex.slice( 0, 6 );
 	}
 
@@ -156,92 +133,96 @@ function hex2rgb( hex ) {
 }
 
 /**
- * Convert HSV coordinate to xyz (Degree to Radians)
+ * Convert HSV coordinate to HSVrad (degree to radian)
  *
- * @param  {array}    -
- * @param  {array}[0] - H
- * @param  {array}[1] - S
- * @param  {array}[2] - V
+ * @param  {array}  argument  - The HSV representation of a color
  *
- * @return {array}    - The xyz coordinates
+ * @return {array}            - The HSVrad color
  */
-function hsv2hsvRad([ h, s, v ]) {
+function Hsv2hsvRad([ h, s, v ]) {
 	return [ ( h * Math.PI ) / 180, s, v ];
 }
 
 /**
- * Convert xyz coordinate to HSV (Radiant to Degree)
+ * Convert HSVrad color to HSV (radian to degree)
  *
- * @param  {array}    -
- * @param  {array}[0] - X
- * @param  {array}[1] - Y
- * @param  {array}[2] - Z
+ * @param {number} hRad - H in rad
+ * @param {number} s    - S
+ * @param {number} v    - V
  *
- * @return {array}    - The HSV coordinates
+ * @return {array}    - The HSV color
  */
-function hsvRad2hsv( hRad, s, v ) {
+function HsvRad2hsv( hRad, s, v ) {
 	return [ ( hRad * 180 ) / Math.PI, s, v ];
 }
 
 /**
- * Convert HEX to HSV
+ * Convert HEX to HSVrad
  *
  * @param  {string} hex - A HEX color
  *
- * @return {array}      - An array of [ x, y, z ] coordinates
+ * @return {array}      - The HSVrad color
  */
-function hex2hsvRad( hex ) {
-	const [ r, g, b, ] = hex2rgb( hex );
-	const hsv = rgb2hsv({ r, g, b, });
-	const hsvRad = hsv2hsvRad( hsv );
+function Hex2hsvRad( hex ) {
+	const [ r, g, b, ] = Hex2rgb( hex );
+	const hsv = Rgb2hsv({ r, g, b, });
+	const hsvRad = Hsv2hsvRad( hsv );
 
 	return hsvRad;
 }
 
 /**
- * Convert HSV to HEX
+ * Convert HSVrad to HEX
  *
- * @param  {integer} x - The x coordinates of the color space HSV
- * @param  {integer} y - The y coordinates of the color space HSV
- * @param  {integer} z - The z coordinates of the color space HSV
+ * @param  {number} hRad - The hue in rad
+ * @param  {number} s    - The saturation
+ * @param  {number} v    - The value
  *
- * @return {string}    - A HEX color
+ * @return {string}      - The HEX color
  */
-function hsvRad2hex( hRad, s, v ) {
-	const [ h ] = hsvRad2hsv( hRad, s, v );
-	const [ r, g, b ] = hsv2rgb( h, s, v );
-	const hex = rgb2hex( r, g, b );
+function HsvRad2hex( hRad, s, v ) {
+	const [ h ] = HsvRad2hsv( hRad, s, v );
+	const { r, g, b } = Hsv2rgb( h, s, v );
+	const hex = Rgb2hex( r, g, b );
 
 	return hex;
 }
 
 /**
- * Generate a linear path from a number to another number
+ * Interpolate a linear path from a number to another number
  *
  * @param  {number}  pointA - The number from which to start
  * @param  {number}  pointB - The number to go to
- * @param  {integer} n      - The current step
- * @param  {integer} steps  - The amount of steps
+ * @param  {number}  n      - The current step
+ * @param  {number}  steps  - The amount of steps
  *
  * @return {number}         - The number at step n
  */
-function getLinear( pointA, pointB, n, steps ) {
+function GetLinear( pointA, pointB, n, steps ) {
+	if( steps === 0 ) {
+		return pointB;
+	}
+
 	return pointA + n * ( ( pointB - pointA ) / steps );
 }
 
 /**
- * Generate a radial path from a number to another number
+ * Interpolate a radial path from a number to another number
  *
- * @param  {number}  fromTheta - The radiant from which to start
- * @param  {number}  toTheta   - The radiant to go to
- * @param  {integer} n         - The current step
- * @param  {integer} steps     - The amount of steps
+ * @param  {number}  fromTheta - The radian from which to start
+ * @param  {number}  toTheta   - The radian to go to
+ * @param  {number}  n         - The current step
+ * @param  {number}  steps     - The amount of steps
  *
- * @return {number}            - The radiant at step n
+ * @return {number}            - The radian at step n
  */
-function getTheta( fromTheta, toTheta, n, steps ) {
+function GetTheta( fromTheta, toTheta, n, steps ) {
 	const TAU = 2 * Math.PI;
 	let longDistance;
+
+	if( steps === 0 ) {
+		return toTheta;
+	}
 
 	if( fromTheta > toTheta ) {
 		if( fromTheta - toTheta < Math.PI ) {
@@ -283,21 +264,113 @@ function getTheta( fromTheta, toTheta, n, steps ) {
  * @return {array}             - An array of colors
  */
 function Gradient( fromColor, toColor, steps ) {
-	const [ fromHRad, fromS, fromV ] = hex2hsvRad( fromColor );
-	const [ toHRad, toS, toV ] = hex2hsvRad( toColor );
+	const [ fromHRad, fromS, fromV ] = Hex2hsvRad( fromColor );
+	const [ toHRad, toS, toV ] = Hex2hsvRad( toColor );
 
 	const hexColors = [];
 
-	for( n = 0; n < steps; n++ ) {
-		const hRad = getTheta( fromHRad, toHRad, n, ( steps - 1 ) );
-		const s = getLinear( fromS, toS, n, ( steps - 1 ) );
-		const v = getLinear( fromV, toV, n, ( steps - 1 ) );
+	for( let n = 0; n < steps; n++ ) {
+		const hRad = GetTheta( fromHRad, toHRad, n, ( steps - 1 ) );
+		const s = GetLinear( fromS, toS, n, ( steps - 1 ) );
+		const v = GetLinear( fromV, toV, n, ( steps - 1 ) );
 
-		hexColors.push( hsvRad2hex( hRad, s, v ) );
+		hexColors.push( HsvRad2hex( hRad, s, v ) );
 	}
 
 	return hexColors;
 }
 
-Gradient( '#ff8800', '#8899dd', 5 )
-	.map( color => console.log(`<div style="background: ${ color };width:5rem;height:5rem"></div>`));
+/**
+ * Calculate the gaps between an array of points
+ *
+ * @param  {array}  points - An array of points, it's not important what's in the array for this function
+ * @param  {number} steps  - The amount of steps we have to distribute between the above points
+ *
+ * @return {array}         - An array of steps per gap
+ */
+function GetGaps( points, steps ) {
+	// steps per gap
+	const gapSteps = Math.floor( ( steps - points.length ) / ( points.length - 1 ) );
+	// steps left over to be distributed
+	const rest = steps - ( points.length + gapSteps * ( points.length - 1 ) );
+	// the gaps array has one less items than our points (cause it's gaps between each of the points)
+	const gaps = Array( points.length - 1 ).fill( gapSteps );
+
+	// let's fill in the rest from the right
+	for( let i = 0; i < rest; i++ ) {
+		gaps[ gaps.length - 1 - i ] ++;
+	}
+
+	return gaps;
+}
+
+/**
+ * Generate colors between two given colors
+ *
+ * @param  {string} fromHex - The color we start from in hex
+ * @param  {string} toHex   - The color we end up at in hex
+ * @param  {number} steps   - How many colors should be returned
+ *
+ * @return {array}          - An array for colors
+ */
+function TransitionBetweenHex( fromHex, toHex, steps ) {
+	const fromRgb = Hex2rgb( fromHex );
+	const toRgb = Hex2rgb( toHex );
+	const hexColors = [];
+	steps ++;
+
+	if( steps === -1 ) {
+		return [];
+	}
+
+	for( let n = 1; n < steps; n++ ) {
+		const red = GetLinear( fromRgb[ 0 ], toRgb[ 0 ], n, steps );
+		const green = GetLinear( fromRgb[ 1 ], toRgb[ 1 ], n, steps );
+		const blue = GetLinear( fromRgb[ 2 ], toRgb[ 2 ], n, steps );
+
+		hexColors.push( Rgb2hex( red, green, blue ) );
+	}
+
+	return hexColors;
+}
+
+/**
+ * Generate n colors between x colors
+ *
+ * @param  {array}  colors - An array of colors in hex
+ * @param  {number} steps  - The amount of colors to generate
+ *
+ * @return {array}         - An array of colors
+ */
+function Transition( colors, steps ) {
+	const gaps = GetGaps( colors, steps );
+	let hexColors = [];
+
+	for( let i = 0; i < colors.length; i++ ) {
+		const gap = gaps[ i - 1 ];
+
+		if( colors[ i - 1 ] ) {
+			const gapColors = TransitionBetweenHex( colors[ i - 1 ], colors[ i ], gap );
+			hexColors = [ ...hexColors, ...gapColors ];
+		}
+
+		if( gap !== -1 ) {
+			hexColors.push( colors[ i ] );
+		}
+	}
+
+	return hexColors;
+}
+
+// Gradient( '#0000ff', '#00ff00', 85 )
+	// .map( color => console.log(`<div style="background: ${ color };width:5rem;height:5rem"></div>`));
+
+// console.log(hsvRad2hex(6.283185307179586,100,100));
+// console.log(hsv2rgb( 360, 100, 100 ));
+// console.log(hsv2rgb( 359.9999, 100, 100 ));
+
+// console.log(Gradient( '#ff0000', '#0000ff', 5 ));
+
+// console.log(Transition( ['#ff0000', '#00ff00', '#0000ff'], 4 )); // [ 0, 1 ]
+console.log(Transition( ['#ff0000', '#0000ff'], 3 )); // [ 1 ]
+// console.log(Transition( ['#ff0000', '#0000ff'], 10 )); // [ 1 ]
